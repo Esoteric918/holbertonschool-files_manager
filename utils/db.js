@@ -1,13 +1,12 @@
 const { MongoClient } = require('mongodb');
 
-const host = process.env.DB_HOST || 'localhost';
-const port = process.env.DB_PORT || 27017;
-const database = process.env.DB_NAME || 'file_manager';
-
 const url = `mongodb://${host}:${port}/${database}`;
 
 class DBClient {
   constructor() {
+    const host = process.env.DB_HOST || 'localhost';
+    const port = process.env.DB_PORT || 27017;
+    const database = process.env.DB_NAME || 'file_manager';
     this.isAlive = function isAlive() { return false; };
 
     MongoClient.connect(url,
@@ -15,12 +14,12 @@ class DBClient {
       (err, client) => {
         if (err) {
           // client.close();
-          console.log(err);
+          return console.log(err);
         } else {
+          this.isAlive = function isAlive() { return true; };
           this.users = client.db(database).collection('users');
           this.files = client.db(database).collection('files');
-          console.log('MongoDB connected');
-          this.isAlive = function isAlive() { return true; };
+          return console.log('MongoDB connected');
         }
       });
   }
