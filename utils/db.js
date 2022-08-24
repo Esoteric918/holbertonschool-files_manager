@@ -17,9 +17,8 @@ class DBClient {
           // client.close();
           console.log(err);
         } else {
-          this.db = client.db(database);
-          this.users = this.db.collection('users');
-          this.files = this.db.collection('files');
+          this.users = client.db(database).collection('users');
+          this.files = client.db(database).collection('files');
           console.log('MongoDB connected');
           this.isAlive = function isAlive() { return true; };
         }
