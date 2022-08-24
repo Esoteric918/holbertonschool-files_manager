@@ -8,10 +8,10 @@ const url = `mongodb://${host}:${port}/${database}`;
 
 class DBClient {
   constructor() {
-    this.isAlive = function isAlive()  { return false; }
+    this.isAlive = function isAlive() { return false; };
 
     MongoClient.connect(url,
-      { useNewUrlParser: true,  useUnfiedTopology: true },
+      { useNewUrlParser: true, useUnfiedTopology: true },
       (err, client) => {
         if (err) {
           // client.close();
@@ -21,10 +21,11 @@ class DBClient {
           this.users = this.db.collection('users');
           this.files = this.db.collection('files');
           console.log('MongoDB connected');
-          this.isAlive = function isAlive()  { return true; }
+          this.isAlive = function isAlive() { return true; };
         }
       });
   }
+
   async nbUsers() {
     return this.users.countDocuments({});
   }
