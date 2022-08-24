@@ -26,11 +26,11 @@ class DBClient {
       });
   }
   async nbUsers() {
-    return this.users.countDocuments();
+    return this.users.countDocuments({});
   }
 
   async nbFiles() {
-    return this.files.countDocuments();
+    return this.files.countDocuments({});
   }
 }
 
