@@ -1,26 +1,28 @@
 const { MongoClient } = require('mongodb');
 
 class DBClient {
-  constructor() {
-    const host = process.env.DB_HOST || 'localhost';
-    const port = process.env.DB_PORT || 27017;
-    const database = process.env.DB_DATABASE || 'file_manager';
-    const url = `mongodb://${host}:${port}/${database}`;
+  constructor(
+    host = process.env.DB_HOST || 'localhost',
+    port = process.env.DB_PORT || 27017,
+    database = process.env.DB_DATABASE || 'files_manager',
+  ) {
     this.isAlive = function isAlive() { return false; };
-
-    MongoClient.connect(url,
-      { useNewUrlParser: true, useUnfiedTopology: true },
+    // console.log('db constructor\n');
+    MongoClient.connect(
+      `mongodb://${host}:${port}/${database}`,
+      { useNewUrlParser: true, useUnifiedTopology: true },
       (err, client) => {
         if (err) {
-          // client.close();
+          client.close();
           return console.log(err);
-        } else {
-          this.isAlive = function isAlive() { return true; };
-          this.users = client.db(database).collection('users');
-          this.files = client.db(database).collection('files');
-          return console.log('MongoDB connected');
         }
-      });
+        this.isAlive = function isAlive() { return true; };
+        // console.log(client);
+        this.users = client.db(database).collection('users');
+        this.files = client.db(database).collection('files');
+        return console.log('mongoDb connected');
+      },
+    );
   }
 
   async nbUsers() {
@@ -32,5 +34,4 @@ class DBClient {
   }
 }
 
-const dbClient = new DBClient();
-module.exports = dbClient;
+module.exports = new DBClient();
