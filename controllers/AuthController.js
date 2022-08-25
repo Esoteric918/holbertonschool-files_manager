@@ -1,6 +1,6 @@
 const sha1 = require('sha1');
 const { v4: uuidv4 } = require('uuid');
-const dbcl = require('../utils/db');
+const Mongo = require('../utils/db');
 const Redis = require('../utils/redis');
 
 class AuthController {
