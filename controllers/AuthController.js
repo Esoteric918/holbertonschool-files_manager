@@ -10,57 +10,51 @@
     // Return this token: { "token": "155342df-2399-41da-9e8c-458b6ac52a0c" } with a status code 200
 
 
-const express = require('express');
-const bcrypt = require('bcrypt');
-const uuidv4 = require('uuid/v4');
-const redis = require('redis');
+    // Every authenticated endpoints of our API will look at this token inside the header X-Token.
+
+    // GET /disconnect should sign-out the user based on the token:
+
+    // Retrieve the user based on the token:
+    // If not found, return an error Unauthorized with a status code 401
+    // Otherwise, delete the token in Redis and return nothing with a status code 204
+    // Inside the file controllers/UsersController.js add a new endpoint:
+
+    // GET /users/me should retrieve the user base on the token used:
+
+    // Retrieve the user based on the token:
+    // If not found, return an error Unauthorized with a status code 401
+    // Otherwise, return the user object (email and id only)
+
+    const sha1 = require('sha1');
+    const { v4: uuidv4 } = require('uuid');
+    const Mongo = require('../utils/db');
+    const Redis = require('../utils/redis');
 
 class AuthController {
-    static getConnect(req, res) {
-        const { email, password } = req.body;
-        const redisClient = redis.createClient();
-        redisClient.get(`auth_${email}`, (err, reply) => {
-            if (err) {
-                return res.status(500).send(err);
-            }
-            if (reply) {
-                return res.status(400).send('User already connected');
-            }
-            Mongo.findUserByEmail(email, (err, user) => {
-                if (err) {
-                    return res.status(500).send(err);
-                }
-                if (!user) {
-                    return res.status(401).send('User not found');
-                }
-                bcrypt.compare(password, user.password, (err, same) => {
-                    if (err) {
-                        return res.status(500).send(err);
-                    }
-                    if (!same) {
-                        return res.status(401).send('Wrong password');
-                    }
-                    const token = uuidv4();
-                    redisClient.set(`auth_${token}`, user._id, 'EX', 24 * 60 * 60, (err, reply) => {
-                        if (err) {
-                            return res.status(500).send(err);
-                        }
-                        return res.status(200).json({ token });
-                    }).quit();
-                }).quit();
-            }).quit();
-        }).quit();
-    }
-    static getDisconnect(req, res) {
-        const { token } = req.body;
-        const redisClient = redis.createClient();
-        redisClient.del(`auth_${token}`, (err, reply) => {
-            if (err) {
-                return res.status(500).send(err);
-            }
-            return res.status(200).send('User disconnected');
-        }).quit();
-    }
+  static async getConnect(req, res) {
+      const authHeader = req.headers.authorization;
+      const auth = Buffer.from(authHeader[1], 'base64').toString().split(':');
+      const { email, password } = auth.splice(0, 2);
+
+      if (!email) return res.status(400).send({ error: 'Missing email' });
+      if (!password) return res.status(400).send({ error: 'Missing password' });
+      const user = await Mongo.users.findOne({
+        email,
+        password: pass ? sha1(password): null
+       });
+      if (!user) return res.status(401).send({ error: 'Unauthorized' });
+      if (sha1(password) !== user.password) return res.status(401).send({ error: 'Unauthorized' });
+      const token = uuidv4();
+      await Redis.set(`auth_${token}`, user._id, 'EX', 24 * 60 * 60);
+      return res.status(200).send({ token });
+  }
+  static async getDisconnect(req, res) {
+    const authToken = `auth_${req.headers['x-token']}`;
+    const userId = await Redis.get(authToken);
+    if (!userId) return res.status(401).send({ error: 'Unauthorized' });
+    await Redis.del(authToken);
+    return res.status(204).send();
+  }
 }
 
 module.exports = AuthController;
