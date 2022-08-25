@@ -13,10 +13,7 @@ class AuthController {
       email,
       password: pass ? sha1(password) : null,
     });
-    if (!email) return res.status(400).send({ error: 'Missing email' });
-    if (!password) return res.status(400).send({ error: 'Missing password' });
     if (!user) return res.status(401).send({ error: 'Unauthorized' });
-    if (sha1(password) !== user.password) return res.status(401).send({ error: 'Unauthorized' });
     const token = uuidv4();
     await Redis.set(`auth_${token}`, user._id, 'EX', 24 * 60 * 60);
     return res.status(200).send({ token });
