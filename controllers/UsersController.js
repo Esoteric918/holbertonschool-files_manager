@@ -17,7 +17,7 @@ class UsersController {
     return res.status(201).send({ id: newUser.insertedId, email });
   }
 
-  static async getUser(req, res) {
+  static async getme(req, res) {
     const authToken = `auth_${req.headers['x-token']}`;
     const userId = await Redis.get(authToken);
     if (!userId) return res.status(401).send({ error: 'Unauthorized' });
