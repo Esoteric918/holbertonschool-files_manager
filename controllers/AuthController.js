@@ -5,9 +5,9 @@ const Redis = require('../utils/redis');
 
 class AuthController {
   static async getConnect(req, res) {
-    const authHeader = req.headers.authorization;
-    const auth = Buffer.from(authHeader[1], 'base64').toString().split(':');
-    const { email, password } = auth.splice(0, 2);
+    const authHeader = req.headers.authorization.split(' ')[1];
+    const auth = Buffer.from(authHeader, 'base64').toString().split(':');
+    const [ email, password ] = auth;
 
     if (!email) return res.status(400).send({ error: 'Missing email' });
     if (!password) return res.status(400).send({ error: 'Missing password' });
