@@ -1,6 +1,6 @@
 const sha1 = require('sha1');
 const { v4: uuidv4 } = require('uuid');
-const Mongo = require('../utils/db');
+const dbClient = require('../utils/db');
 const Redis = require('../utils/redis');
 
 class AuthController {
@@ -9,7 +9,7 @@ class AuthController {
     const auth = Buffer.from(authHeader, 'base64').toString();
     const [ email, password ] = auth.split(':');
 
-    const user = await Mongo.users.findOne({
+    const user = await dbClient.users.findOne({
       email,
       password: pass ? sha1(password) : null,
     });
