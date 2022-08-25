@@ -6,15 +6,15 @@ const Redis = require('../utils/redis');
 class AuthController {
   static async getConnect(req, res) {
     const authHeader = req.headers.authorization.split(' ')[1];
-    const auth = Buffer.from(authHeader, 'base64').toString().split(':');
-    const [ email, password ] = auth;
+    const auth = Buffer.from(authHeader, 'base64').toString();
+    const [ email, password ] = auth.split(':');
 
-    if (!email) return res.status(400).send({ error: 'Missing email' });
-    if (!password) return res.status(400).send({ error: 'Missing password' });
     const user = await Mongo.users.findOne({
       email,
       password: pass ? sha1(password) : null,
     });
+    if (!email) return res.status(400).send({ error: 'Missing email' });
+    if (!password) return res.status(400).send({ error: 'Missing password' });
     if (!user) return res.status(401).send({ error: 'Unauthorized' });
     if (sha1(password) !== user.password) return res.status(401).send({ error: 'Unauthorized' });
     const token = uuidv4();
