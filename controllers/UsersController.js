@@ -29,6 +29,7 @@ class UsersController {
     })();
   }
 
+<<<<<<< HEAD
   static getMe(req, res) {
     (async () => {
       const token = req.headers['x-token'];
@@ -44,6 +45,14 @@ class UsersController {
 
       return res.status(200).send({ id: userData._id, email: userData.email });
     })();
+=======
+  static async getMe(req, res) {
+    const authToken = `auth_${req.headers['x-token']}`;
+    const userId = await Redis.get(authToken);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const user = await dbClient.users.findOne({ _id: new mon.ObjectId(userId) });
+    return res.json({ id: user._id, email: user.email });
+>>>>>>> parent of a6d7e832... task4
   }
 }
 
