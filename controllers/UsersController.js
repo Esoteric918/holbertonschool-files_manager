@@ -17,12 +17,12 @@ class UsersController {
     return res.status(201).send({ id: newUser.insertedId, email });
   }
 
-  static async getme(req, res) {
+  static async getMe(req, res) {
     const authToken = `auth_${req.headers['x-token']}`;
     const userId = await Redis.get(authToken);
-    if (!userId) return res.status(401).send({ error: 'Unauthorized' });
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     const user = await Mongo.users.findOne({ _id: new mon.ObjectId(userId) });
-    return res.send({ id: user._id, email: user.email });
+    return res.json({ id: user._id, email: user.email });
   }
 }
 

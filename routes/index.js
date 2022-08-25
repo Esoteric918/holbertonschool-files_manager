@@ -4,6 +4,7 @@ const AppCon = require('../controllers/AppController');
 const UserCon = require('../controllers/UsersController');
 const AuthCon = require('../controllers/AuthController');
 
+
 const router = express.Router();
 // GET routes
 router.get('/status', AppCon.getStatus);
