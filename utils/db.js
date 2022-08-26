@@ -7,7 +7,6 @@ class DBClient {
     database = process.env.DB_DATABASE || 'files_manager',
   ) {
     this.isAlive = function isAlive() { return false; };
-    // console.log('db constructor\n');
     MongoClient.connect(
       `mongodb://${host}:${port}/${database}`,
       { useNewUrlParser: true, useUnifiedTopology: true },
@@ -34,5 +33,5 @@ class DBClient {
   }
 }
 
-const dbClient = new DBClient();
-module.exports = dbClient;
+module.exports = new DBClient();
+

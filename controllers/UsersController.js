@@ -10,6 +10,7 @@ class UsersController {
     if (!email) return res.status(400).send({ error: 'Missing email' });
     if (!password) return res.status(400).send({ error: 'Missing password' });
     if (await dbClient.users.findOne({ email })) return res.status(400).send({ error: 'Already exist' });
+
     const newUser = await dbClient.users.insertOne({
       email,
       password: sha1(password),
@@ -17,18 +18,13 @@ class UsersController {
     return res.status(201).send({ id: newUser.insertedId, email });
   }
 
-  static getMe(req, res) {
-    (async () => {
-      const authtoken = req.headers['x-token'];
-      const user = await Redis.get(`auth_${authtoken}`);
-      const userInfo = await dbClient.db
-        .collection('users')
-        .findOne({ _id: new mon.ObjectID(user) });
-      if (!userInfo) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
-      return res.status(200).json({ id: userInfo._id, email: userInfo.email });
-    })();
+  static async getMe(req, res) {
+    const authToken = `auth_${req.headers['x-token']}`;
+    const userId = await Redis.get(authToken);
+
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const user = await dbClient.users.findOne({ _id: new mon.ObjectId(userId) });
+    return res.json({ id: user._id, email: user.email });
   }
 }
 
